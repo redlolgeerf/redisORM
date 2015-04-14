@@ -9,10 +9,6 @@ class Field(object):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    def assign_value(self, value):
-        self._value = self._coerce(value)
-        return self
-
     def add_to_class(self, model_class, name):
         self.model_class = model_class
         self.name = name
@@ -20,16 +16,12 @@ class Field(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is not None:
-            return self._value
+            return instance._data[self.name]
         return self
 
     def __set__(self, instance, value):
-        instance._value = value
+        instance._data[self.name] = value
 
 
 class IntField(Field):
-    _coerce = int
-
-
-class SetField(Field):
-    _coerce = set
+    pass

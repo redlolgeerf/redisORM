@@ -5,7 +5,7 @@ import unittest
 from tornado import testing
 
 from redisorm.model import Model
-from redisorm.fields import IntField, SetField
+from redisorm.fields import IntField
 
 
 class TestModel(Model):

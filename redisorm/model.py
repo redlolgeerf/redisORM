@@ -32,7 +32,6 @@ class Model(_with_metaclass(BaseModel)):
     """
 
     def __init__(self, *args, **kwargs):
+        self._data = {}
         for k, v in kwargs.items():
-            if k in self._fields:
-                v = self._fields[k].assign_value(v)
             setattr(self, k, v)
