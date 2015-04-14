@@ -24,6 +24,8 @@ class MyTestCase(testing.AsyncTestCase):
         self.assertEqual(f.redis_key(), u'TestModel:1')
         self.assertEqual(f.num.redis_key(), u'TestModel:1:num')
 
+        z = TestModel(_id=2, num=3)
+        yield z.save()
 
 def all():
     suites = []

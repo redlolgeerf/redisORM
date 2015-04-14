@@ -3,6 +3,8 @@
 
 
 from uuid import uuid4
+from tornado import gen
+from tornadoredis import Client
 from redisorm.fields import Field
 
 
@@ -42,3 +44,16 @@ class Model(_with_metaclass(BaseModel)):
 
     def redis_key(self):
         return self.delimiter.join([type(self).__name__, str(self._id)])
+
+    @gen.coroutine
+    def save(self, pipe=None):
+        if pipe is None:
+            conn = Client()
+            _pipe = conn.pipeline()
+        else:
+            _pipe = pipe
+        for k in self._fields:
+            container = getattr(self, k)
+            yield container.save(_pipe)
+        if pipe is None:
+            yield gen.Task(_pipe.execute)
