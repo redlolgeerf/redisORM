@@ -6,6 +6,7 @@ from tornado import testing
 
 from redisorm.model import Model
 from redisorm.fields import IntField
+from redisorm.containers import RedisInt
 
 
 class TestModel(Model):
@@ -17,6 +18,7 @@ class MyTestCase(testing.AsyncTestCase):
     def test_model_create(self):
         t = TestModel(num=1)
         self.assertEqual(t.num, 1)
+        self.assertTrue(isinstance(t.num, RedisInt))
 
 
 def all():

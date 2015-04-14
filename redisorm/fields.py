@@ -2,6 +2,9 @@
 # encoding: utf-8
 
 
+from redisorm.containers import RedisInt
+
+
 class Field(object):
 
     def __init__(self, *args, **kwargs):
@@ -20,8 +23,8 @@ class Field(object):
         return self
 
     def __set__(self, instance, value):
-        instance._data[self.name] = value
+        instance._data[self.name] = self._container(value)
 
 
 class IntField(Field):
-    pass
+    _container = RedisInt
