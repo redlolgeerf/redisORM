@@ -35,5 +35,9 @@ class Field(object):
         container._field = self
         yield container.load(pipe)
 
+    @gen.coroutine
+    def save(self, instance, pipe):
+        yield instance._data[self.name].save(pipe)
+
 class IntField(Field):
     _container = RedisInt

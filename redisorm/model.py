@@ -52,9 +52,8 @@ class Model(_with_metaclass(BaseModel)):
             _pipe = conn.pipeline()
         else:
             _pipe = pipe
-        for k in self._fields:
-            container = getattr(self, k)
-            yield container.save(_pipe)
+        for k, field in self._fields.items():
+            yield field.save(self, _pipe)
         if pipe is None:
             yield gen.Task(_pipe.execute)
 
