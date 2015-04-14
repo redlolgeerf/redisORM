@@ -9,16 +9,14 @@ from redisorm.fields import IntField, SetField
 
 
 class TestModel(Model):
-    id = IntField()
-    members = SetField()
+    num = IntField()
 
 
 class MyTestCase(testing.AsyncTestCase):
     @testing.gen_test
     def test_model_create(self):
-        t = TestModel(id=1, members=[1, 2, 3])
-        self.assertEqual(t.members, set([1,2,3]))
-        self.assertEqual(t.id, 1)
+        t = TestModel(num=1)
+        self.assertEqual(t.num, 1)
 
 
 def all():
