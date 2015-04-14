@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 
+from tornado import gen
 from redisorm.containers import RedisInt
 
 
@@ -24,6 +25,8 @@ class Field(object):
 
     def __set__(self, instance, value):
         instance._data[self.name] = self._container(value)
+        instance._data[self.name]._instance = instance
+        instance._data[self.name]._field = self
 
 
 class IntField(Field):

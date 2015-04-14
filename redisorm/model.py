@@ -2,6 +2,9 @@
 # encoding: utf-8
 
 
+from uuid import uuid4
+from tornado import gen
+from tornadoredis import Client
 from redisorm.fields import Field
 
 
@@ -31,7 +34,25 @@ class Model(_with_metaclass(BaseModel)):
     Provides machinery of populating fields.
     """
 
-    def __init__(self, *args, **kwargs):
+    delimiter = u':'
+
+    def __init__(self, _id=None, *args, **kwargs):
         self._data = {}
+        self._id = _id or uuid4()
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    def redis_key(self):
+        return self.delimiter.join([type(self).__name__, str(self._id)])
+
+    @gen.coroutine
+    def save(self, pipe=None):
+        if pipe is None:
+            conn = Client()
+            _pipe = conn.pipeline()
+        else:
+            _pipe = pipe
+        for k, field in self._fields.items():
+            yield self.field.save(self, pipe)
+        if pipe is None:
+            yield gen.Task(_pipe.execute)

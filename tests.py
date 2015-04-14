@@ -20,6 +20,10 @@ class MyTestCase(testing.AsyncTestCase):
         self.assertEqual(t.num, 1)
         self.assertTrue(isinstance(t.num, RedisInt))
 
+        f = TestModel(_id=1, num=2)
+        self.assertEqual(f.redis_key(), u'TestModel:1')
+        self.assertEqual(f.num.redis_key(), u'TestModel:1:num')
+
 
 def all():
     suites = []
