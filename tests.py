@@ -27,6 +27,9 @@ class MyTestCase(testing.AsyncTestCase):
         z = TestModel(_id=2, num=3)
         yield z.save()
 
+        d = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(d.num, 3)
+
 def all():
     suites = []
     suites.append(unittest.TestLoader().loadTestsFromTestCase(MyTestCase))

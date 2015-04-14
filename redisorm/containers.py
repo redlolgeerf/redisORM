@@ -18,6 +18,10 @@ class RedisContainer(object):
     def save(self, pipe):
         pipe.set(self.redis_key(), self)
 
+    @gen.coroutine
+    def load(self, pipe):
+        pipe.get(self.redis_key())
+
 
 class RedisInt(RedisContainer, int):
     pass

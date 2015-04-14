@@ -57,3 +57,22 @@ class Model(_with_metaclass(BaseModel)):
             yield container.save(_pipe)
         if pipe is None:
             yield gen.Task(_pipe.execute)
+
+    @classmethod
+    @gen.coroutine
+    def get_by_id(cls, _id):
+        instance = cls(_id=_id)
+        yield instance.load()
+        raise gen.Return(instance)
+
+    @gen.coroutine
+    def load(self):
+        conn = Client()
+        pipe = conn.pipeline()
+        fields = []
+        for k, field in self._fields.items():
+            yield field.load(self, pipe)
+            fields.append(k)
+        results = yield gen.Task(pipe.execute)
+        for i, field in enumerate(fields):
+            setattr(self, field, results[i])

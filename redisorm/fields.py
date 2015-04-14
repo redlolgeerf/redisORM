@@ -28,6 +28,12 @@ class Field(object):
         instance._data[self.name]._instance = instance
         instance._data[self.name]._field = self
 
+    @gen.coroutine
+    def load(self, instance, pipe):
+        container = self._container()
+        container._instance = instance
+        container._field = self
+        yield container.load(pipe)
 
 class IntField(Field):
     _container = RedisInt
