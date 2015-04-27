@@ -3,6 +3,7 @@
 
 import unittest
 from tornado import testing
+from tornadoredis import Client
 
 from redisorm.model import Model
 from redisorm.fields import IntField
@@ -13,7 +14,19 @@ class TestModel(Model):
     num = IntField()
 
 
-class MyTestCase(testing.AsyncTestCase):
+class RedisMixin(object):
+
+    def setUp(self, *args, **kwargs):
+        super(RedisMixin, self).setUp(*args, **kwargs)
+        self.conn = Client()
+        self.conn.flushall()
+
+    def tearDown(self, *args, **kwargs):
+        super(RedisMixin, self).tearDown(*args, **kwargs)
+        del self.conn
+
+
+class MyTestCase(RedisMixin, testing.AsyncTestCase):
     @testing.gen_test
     def test_model_create(self):
         t = TestModel(num=1)
