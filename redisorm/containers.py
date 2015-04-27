@@ -26,6 +26,31 @@ class RedisContainer(object):
     def set_value(self, val):
         self._value = self._type(val)
 
+    @gen.coroutine
+    def db_operation(self, operation, pipe=None, conn=None):
+        """
+        Perform operation on db.
+
+        :operation: tuple ('name_of_operation', 'args')
+        """
+        assert pipe or conn, 'Either pipe or conn shall be provided'
+        if pipe:
+            if len(operation) == 1:
+                getattr(pipe, operation[0])(self.redis_key())
+            else:
+                getattr(pipe, operation[0])(self.redis_key(), operation[1])
+            raise gen.Return(pipe)
+        if conn:
+            x = getattr(conn, operation[0])
+            if len(operation) == 1:
+                result = yield gen.Task(x, self.redis_key())
+            else:
+                result = yield gen.Task(x, self.redis_key(), operation[1])
+            raise gen.Return(result)
+
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, self._value)
+
 
 class Comparable(object):
 
@@ -53,6 +78,26 @@ class Comparable(object):
 
 class RedisInt(Comparable, RedisContainer):
     _type = int
+
+    @gen.coroutine
+    def incr(self, *args, **kwargs):
+        self._value += 1
+        return self.db_operation(('incr', ), *args, **kwargs)
+
+    @gen.coroutine
+    def incrby(self, increment, *args, **kwargs):
+        self._value += increment
+        return self.db_operation(('incrby', increment), *args, **kwargs)
+
+    @gen.coroutine
+    def decr(self, *args, **kwargs):
+        self._value -= 1
+        return self.db_operation(('decr', ), *args, **kwargs)
+
+    @gen.coroutine
+    def decrby(self, decrement, *args, **kwargs):
+        self._value -= decrement
+        return self.db_operation(('decrby', decrement), *args, **kwargs)
 
     def __abs__(self):
         return self._value.__abs__()
@@ -164,7 +209,6 @@ class RedisInt(Comparable, RedisContainer):
         return self._value.__sub__(other)
 
     def __truediv__(self, other):
-        print "called"
         return self._value.__truediv__(other)
 
     def __trunc__(self):

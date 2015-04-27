@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import unittest
-from tornado import testing
+from tornado import testing, gen
 from tornadoredis import Client
 
 from redisorm.model import Model
@@ -68,10 +68,10 @@ class ComparableTest(testing.AsyncTestCase):
         self.assertTrue(self.t.num != 2)
 
 
-class RedisIntTest(testing.AsyncTestCase):
+class RedisIntTest(RedisMixin, testing.AsyncTestCase):
     def setUp(self):
         super(RedisIntTest, self).setUp()
-        self.t = TestModel(num=3)
+        self.t = TestModel(_id=2, num=3)
 
     def test_abs(self):
         self.assertEqual(abs(self.t.num), 3)
@@ -132,6 +132,65 @@ class RedisIntTest(testing.AsyncTestCase):
         self.assertEqual(self.t.num.__truediv__(2), 1.5)
         # TODO: add tests for binary operation
 
+    @testing.gen_test
+    def test_incr(self):
+        yield self.t.save()
+        result = yield self.t.num.incr(conn=self.conn)
+        self.assertEqual(self.t.num, 4)
+        d = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(d.num, 4)
+
+        pipe = self.conn.pipeline()
+        yield self.t.num.incr(pipe=pipe)
+        yield gen.Task(pipe.execute)
+        s = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(s.num, 5)
+        self.assertEqual(self.t.num, 5)
+
+    @testing.gen_test
+    def test_incrby(self):
+        yield self.t.save()
+        result = yield self.t.num.incrby(2, conn=self.conn)
+        self.assertEqual(self.t.num, 5)
+        d = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(d.num, 5)
+
+        pipe = self.conn.pipeline()
+        yield self.t.num.incrby(10, pipe=pipe)
+        yield gen.Task(pipe.execute)
+        s = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(s.num, 15)
+        self.assertEqual(self.t.num, 15)
+
+    @testing.gen_test
+    def test_decr(self):
+        yield self.t.save()
+        result = yield self.t.num.decr(conn=self.conn)
+        self.assertEqual(self.t.num, 2)
+        d = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(d.num, 2)
+
+        pipe = self.conn.pipeline()
+        yield self.t.num.decr(pipe=pipe)
+        yield gen.Task(pipe.execute)
+        s = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(s.num, 1)
+        self.assertEqual(self.t.num, 1)
+
+    @testing.gen_test
+    def test_decrby(self):
+        yield self.t.save()
+        result = yield self.t.num.decrby(2, conn=self.conn)
+        self.assertEqual(self.t.num, 1)
+        d = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(d.num, 1)
+
+        pipe = self.conn.pipeline()
+        yield self.t.num.decrby(1, pipe=pipe)
+        yield gen.Task(pipe.execute)
+        s = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(s.num, 0)
+        self.assertEqual(self.t.num, 0)
 
 def all():
     suites = []
