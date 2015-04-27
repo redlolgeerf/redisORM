@@ -6,12 +6,13 @@ from tornado import testing, gen
 from tornadoredis import Client
 
 from redisorm.model import Model
-from redisorm.fields import IntField
-from redisorm.containers import RedisInt
+from redisorm.fields import IntField, StrField
+from redisorm.containers import RedisInt, RedisStr
 
 
 class TestModel(Model):
     num = IntField()
+    name = StrField()
 
 
 class RedisMixin(object):
@@ -29,19 +30,23 @@ class RedisMixin(object):
 class MyTestCase(RedisMixin, testing.AsyncTestCase):
     @testing.gen_test
     def test_model_create(self):
-        t = TestModel(num=1)
+        t = TestModel(num=1, name='Alice')
         self.assertEqual(t.num, 1)
         self.assertTrue(isinstance(t.num, RedisInt))
+        self.assertEqual(t.name, 'Alice')
+        self.assertTrue(isinstance(t.name, RedisStr))
 
-        f = TestModel(_id=1, num=2)
+        f = TestModel(_id=1, num=2, name='Bob')
         self.assertEqual(f.redis_key(), u'TestModel:1')
         self.assertEqual(f.num.redis_key(), u'TestModel:1:num')
+        self.assertEqual(f.name.redis_key(), u'TestModel:1:name')
 
-        z = TestModel(_id=2, num=3)
+        z = TestModel(_id=2, num=3, name='Jane')
         yield z.save()
 
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.num, 3)
+        self.assertEqual(d.name, 'Jane')
 
 
 class ComparableTest(testing.AsyncTestCase):
@@ -68,10 +73,24 @@ class ComparableTest(testing.AsyncTestCase):
         self.assertTrue(self.t.num != 2)
 
 
+class RedisStrTest(RedisMixin, testing.AsyncTestCase):
+    def setUp(self):
+        super(RedisIntTest, self).setUp()
+        self.t = TestModel(_id=2, num=3, name='Alice')
+
+    @testing.gen_test
+    def test_append(self):
+        yield self.t.save()
+        result = yield self.t.name.append(' Bob', conn=self.conn)
+        self.assertEqual(self.t.name, 'Alice Bob')
+        d = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(d.name, 'Alice Bob')
+
+
 class RedisIntTest(RedisMixin, testing.AsyncTestCase):
     def setUp(self):
         super(RedisIntTest, self).setUp()
-        self.t = TestModel(_id=2, num=3)
+        self.t = TestModel(_id=2, num=3, name='Alice')
 
     def test_abs(self):
         self.assertEqual(abs(self.t.num), 3)

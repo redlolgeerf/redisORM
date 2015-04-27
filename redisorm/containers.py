@@ -76,6 +76,17 @@ class Comparable(object):
         return self._value != other
 
 
+class RedisStr(Comparable, RedisContainer):
+    _type = str
+
+    @gen.coroutine
+    def append(self, increment, *args, **kwargs):
+        self._value += increment
+        return self.db_operation(('append', increment), *args, **kwargs)
+
+    # TODO: add str methods
+
+
 class RedisInt(Comparable, RedisContainer):
     _type = int
 

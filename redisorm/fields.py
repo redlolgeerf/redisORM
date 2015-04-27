@@ -3,7 +3,7 @@
 
 
 from tornado import gen
-from redisorm.containers import RedisInt
+from redisorm.containers import RedisInt, RedisStr
 
 
 class Field(object):
@@ -24,7 +24,7 @@ class Field(object):
         return self
 
     def __set__(self, instance, value):
-        if not self.name in instance._data:
+        if self.name not in instance._data:
             instance._data[self.name] = self._container(value)
             instance._data[self.name]._instance = instance
             instance._data[self.name]._field = self
@@ -41,6 +41,11 @@ class Field(object):
     @gen.coroutine
     def save(self, instance, pipe):
         yield instance._data[self.name].save(pipe)
+
+
+class StrField(Field):
+    _container = RedisStr
+
 
 class IntField(Field):
     _container = RedisInt
