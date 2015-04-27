@@ -24,9 +24,12 @@ class Field(object):
         return self
 
     def __set__(self, instance, value):
-        instance._data[self.name] = self._container(value)
-        instance._data[self.name]._instance = instance
-        instance._data[self.name]._field = self
+        if not self.name in instance._data:
+            instance._data[self.name] = self._container(value)
+            instance._data[self.name]._instance = instance
+            instance._data[self.name]._field = self
+        else:
+            instance._data[self.name].set_value(value)
 
     @gen.coroutine
     def load(self, instance, pipe):
