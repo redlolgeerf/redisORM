@@ -73,6 +73,39 @@ class ComparableTest(testing.AsyncTestCase):
         self.assertTrue(self.t.num != 2)
 
 
+class ExpirationTest(RedisMixin, testing.AsyncTestCase):
+    def setUp(self):
+        super(ExpirationTest, self).setUp()
+        self.t = TestModel(_id=2, num=3, name='Alice')
+
+    @testing.gen_test
+    def test_expire(self):
+        yield self.t.save()
+
+        x = yield self.t.name.expire(20, conn=self.conn)
+        self.assertEqual(x, 1)
+        x = yield self.t.name.ttl(conn=self.conn)
+        self.assertTrue(1 < x <= 20)
+        x = yield self.t.name.persist(conn=self.conn)
+        self.assertEqual(x, 1)
+        x = yield self.t.name.ttl(conn=self.conn)
+        self.assertEqual(x, None)  # this is how tornadoredis does things
+
+        pipe = self.conn.pipeline()
+        yield self.t.name.expire(20, pipe=pipe)
+        x = yield gen.Task(pipe.execute)
+        self.assertEqual(x, [True])  # this is awkward
+        yield self.t.name.ttl(pipe=pipe)
+        x = yield gen.Task(pipe.execute)
+        self.assertTrue(1 < x[0] <= 20)
+        yield self.t.name.persist(pipe=pipe)
+        x = yield gen.Task(pipe.execute)
+        self.assertEqual(x, [True])
+        yield self.t.name.ttl(pipe=pipe)
+        x = yield gen.Task(pipe.execute)
+        self.assertEqual(x, [None])  # this is how tornadoredis does things
+
+
 class RedisStrTest(RedisMixin, testing.AsyncTestCase):
     def setUp(self):
         super(RedisStrTest, self).setUp()
@@ -243,18 +276,21 @@ class RedisIntTest(RedisMixin, testing.AsyncTestCase):
         self.assertEqual(self.t.num, 1)
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.num, 1)
+        self.assertEqual(result, 1)
 
         pipe = self.conn.pipeline()
         yield self.t.num.decrby(1, pipe=pipe)
-        yield gen.Task(pipe.execute)
+        result = yield gen.Task(pipe.execute)
         s = yield TestModel.get_by_id(_id=2)
         self.assertEqual(s.num, 0)
         self.assertEqual(self.t.num, 0)
+        self.assertEqual(result, [0])
 
 
 def all():
     suites = []
     suites.append(unittest.TestLoader().loadTestsFromTestCase(MyTestCase))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(ExpirationTest))
     suites.append(unittest.TestLoader().loadTestsFromTestCase(ComparableTest))
     suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisIntTest))
     suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisStrTest))
