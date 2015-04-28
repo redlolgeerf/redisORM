@@ -52,6 +52,35 @@ class RedisContainer(object):
         return "{}({})".format(type(self).__name__, self._value)
 
 
+class Expirable(object):
+    """
+    Mixin to provide expiration functionality.
+    """
+    @gen.coroutine
+    def persist(self, *args, **kwargs):
+        """
+        Turn the key back into a persistent key.
+        """
+        result = yield self.db_operation(('persist', ), *args, **kwargs)
+        raise gen.Return(result)
+
+    @gen.coroutine
+    def expire(self, seconds, *args, **kwargs):
+        """
+        Set a timeout on key.
+        """
+        result = yield self.db_operation(('expire', seconds), *args, **kwargs)
+        raise gen.Return(result)
+
+    @gen.coroutine
+    def ttl(self, *args, **kwargs):
+        """
+        Get a timeout on key.
+        """
+        result = yield self.db_operation(('ttl', ), *args, **kwargs)
+        raise gen.Return(result)
+
+
 class Comparable(object):
 
     def __cmp__(self, other):
@@ -76,7 +105,7 @@ class Comparable(object):
         return self._value != other
 
 
-class RedisStr(Comparable, RedisContainer):
+class RedisStr(Comparable, Expirable, RedisContainer):
     _type = str
 
     @gen.coroutine
@@ -218,7 +247,7 @@ class RedisStr(Comparable, RedisContainer):
         return self._value.zfill(*args, **kwargs)
 
 
-class RedisInt(Comparable, RedisContainer):
+class RedisInt(Comparable, Expirable, RedisContainer):
     _type = int
 
     @gen.coroutine
