@@ -111,6 +111,7 @@ class RedisStrTest(RedisMixin, testing.AsyncTestCase):
     def test_split(self):
         self.assertEqual(self.t.name.split('i'), ['Al', 'ce'])
 
+
 class RedisIntTest(RedisMixin, testing.AsyncTestCase):
     def setUp(self):
         super(RedisIntTest, self).setUp()
@@ -235,11 +236,13 @@ class RedisIntTest(RedisMixin, testing.AsyncTestCase):
         self.assertEqual(s.num, 0)
         self.assertEqual(self.t.num, 0)
 
+
 def all():
     suites = []
-    suites.append(unittest.TestLoader().loadTestsFromTestCase(MyTestCase))
-    suites.append(unittest.TestLoader().loadTestsFromTestCase(ComparableTest))
-    suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisIntTest))
+    # suites.append(unittest.TestLoader().loadTestsFromTestCase(MyTestCase))
+    # suites.append(unittest.TestLoader().loadTestsFromTestCase(ComparableTest))
+    # suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisIntTest))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisStrTest))
     return unittest.TestSuite(suites)
 
 if __name__ == '__main__':

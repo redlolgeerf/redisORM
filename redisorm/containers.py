@@ -219,7 +219,6 @@ class RedisStr(Comparable, RedisContainer):
         return self._value.zfill(*args, **kwargs)
 
 
-
 class RedisInt(Comparable, RedisContainer):
     _type = int
 
@@ -360,5 +359,3 @@ class RedisInt(Comparable, RedisContainer):
 
     def __xor__(self, other):
         return self._value.__xor__(other)
-
-    ######### magick methods end #########
