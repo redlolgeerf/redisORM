@@ -239,9 +239,9 @@ class RedisIntTest(RedisMixin, testing.AsyncTestCase):
 
 def all():
     suites = []
-    # suites.append(unittest.TestLoader().loadTestsFromTestCase(MyTestCase))
-    # suites.append(unittest.TestLoader().loadTestsFromTestCase(ComparableTest))
-    # suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisIntTest))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(MyTestCase))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(ComparableTest))
+    suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisIntTest))
     suites.append(unittest.TestLoader().loadTestsFromTestCase(RedisStrTest))
     return unittest.TestSuite(suites)
 
