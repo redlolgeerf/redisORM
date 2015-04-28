@@ -83,6 +83,7 @@ class RedisStrTest(RedisMixin, testing.AsyncTestCase):
         yield self.t.save()
         result = yield self.t.name.append(' Bob', conn=self.conn)
         self.assertEqual(self.t.name, 'Alice Bob')
+        self.assertEqual(result, 9)
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.name, 'Alice Bob')
 
