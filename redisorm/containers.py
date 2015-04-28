@@ -81,10 +81,143 @@ class RedisStr(Comparable, RedisContainer):
 
     @gen.coroutine
     def append(self, increment, *args, **kwargs):
+        """
+        APPEND key value Append a value to a key
+        """
         self._value += increment
         return self.db_operation(('append', increment), *args, **kwargs)
 
     # TODO: add str methods
+
+    def __add__(self, other):
+        return self._value.__add__(other)
+
+    def __len__(self):
+        return self._value.__len__()
+
+    def __mul__(self, multiplier):
+        return self._value.__mul__(multiplier)
+
+    def __contains__(self, substr):
+        return substr in self._value
+
+    def __getslice__(self, *args, **kwargs):
+        return self._value.__getslice__(*args, **kwargs)
+
+    def capitalize(self, *args, **kwargs):
+        return self._value.capitalize(*args, **kwargs)
+
+    def center(self, *args, **kwargs):
+        return self._value.center(*args, **kwargs)
+
+    def count(self, *args, **kwargs):
+        return self._value.count(*args, **kwargs)
+
+    def decode(self, *args, **kwargs):
+        return self._value.decode(*args, **kwargs)
+
+    def encode(self, *args, **kwargs):
+        return self._value.encode(*args, **kwargs)
+
+    def endswith(self, *args, **kwargs):
+        return self._value.endswith(*args, **kwargs)
+
+    def expandtabs(self, *args, **kwargs):
+        return self._value.expandtabs(*args, **kwargs)
+
+    def find(self, *args, **kwargs):
+        return self._value.find(*args, **kwargs)
+
+    def format(self, *args, **kwargs):
+        return self._value.format(*args, **kwargs)
+
+    def index(self, *args, **kwargs):
+        return self._value.index(*args, **kwargs)
+
+    def isalnum(self, *args, **kwargs):
+        return self._value.isalnum(*args, **kwargs)
+
+    def isalpha(self, *args, **kwargs):
+        return self._value.isalpha(*args, **kwargs)
+
+    def isdigit(self, *args, **kwargs):
+        return self._value.isdigit(*args, **kwargs)
+
+    def islower(self, *args, **kwargs):
+        return self._value.islower(*args, **kwargs)
+
+    def isspace(self, *args, **kwargs):
+        return self._value.isspace(*args, **kwargs)
+
+    def istitle(self, *args, **kwargs):
+        return self._value.istitle(*args, **kwargs)
+
+    def isupper(self, *args, **kwargs):
+        return self._value.isupper(*args, **kwargs)
+
+    def join(self, *args, **kwargs):
+        return self._value.join(*args, **kwargs)
+
+    def ljust(self, *args, **kwargs):
+        return self._value.ljust(*args, **kwargs)
+
+    def lower(self, *args, **kwargs):
+        return self._value.lower(*args, **kwargs)
+
+    def lstrip(self, *args, **kwargs):
+        return self._value.lstrip(*args, **kwargs)
+
+    def partition(self, *args, **kwargs):
+        return self._value.partition(*args, **kwargs)
+
+    def replace(self, *args, **kwargs):
+        return self._value.replace(*args, **kwargs)
+
+    def rfind(self, *args, **kwargs):
+        return self._value.rfind(*args, **kwargs)
+
+    def rindex(self, *args, **kwargs):
+        return self._value.rindex(*args, **kwargs)
+
+    def rjust(self, *args, **kwargs):
+        return self._value.rjust(*args, **kwargs)
+
+    def rpartition(self, *args, **kwargs):
+        return self._value.rpartition(*args, **kwargs)
+
+    def rsplit(self, *args, **kwargs):
+        return self._value.rsplit(*args, **kwargs)
+
+    def rstrip(self, *args, **kwargs):
+        return self._value.rstrip(*args, **kwargs)
+
+    def split(self, *args, **kwargs):
+        return self._value.split(*args, **kwargs)
+
+    def splitlines(self, *args, **kwargs):
+        return self._value.splitlines(*args, **kwargs)
+
+    def startswith(self, *args, **kwargs):
+        return self._value.strip(*args, **kwargs)
+
+    def strip(self, *args, **kwargs):
+        return self._value.strip(*args, **kwargs)
+
+    def swapcase(self, *args, **kwargs):
+        return self._value.swapcase(*args, **kwargs)
+
+    def title(self, *args, **kwargs):
+        return self._value.title(*args, **kwargs)
+
+    def translate(self, *args, **kwargs):
+        return self._value.translate(*args, **kwargs)
+
+    def upper(self, *args, **kwargs):
+        return self._value.upper(*args, **kwargs)
+
+    def zfill(self, *args, **kwargs):
+        return self._value.zfill(*args, **kwargs)
+
 
 
 class RedisInt(Comparable, RedisContainer):

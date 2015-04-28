@@ -75,7 +75,7 @@ class ComparableTest(testing.AsyncTestCase):
 
 class RedisStrTest(RedisMixin, testing.AsyncTestCase):
     def setUp(self):
-        super(RedisIntTest, self).setUp()
+        super(RedisStrTest, self).setUp()
         self.t = TestModel(_id=2, num=3, name='Alice')
 
     @testing.gen_test
@@ -86,6 +86,30 @@ class RedisStrTest(RedisMixin, testing.AsyncTestCase):
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.name, 'Alice Bob')
 
+    def test_len(self):
+        self.assertEqual(len(self.t.name), 5)
+
+    def test_mul(self):
+        self.assertEqual(self.t.name * 3, 'AliceAliceAlice')
+        self.t.name *= 3
+        self.assertEqual(self.t.name, 'AliceAliceAlice')
+
+    def test_add(self):
+        self.assertEqual(self.t.name + 'Bob', 'AliceBob')
+        self.t.name += 'Bob'
+        self.assertEqual(self.t.name, 'AliceBob')
+
+    def test_contains(self):
+        self.assertTrue('A' in self.t.name)
+
+    def test_getslice(self):
+        self.assertEqual(self.t.name[-3:-1], 'ic')
+
+    def test_capitalize(self):
+        self.assertEqual(self.t.name.capitalize(), 'Alice')
+
+    def test_split(self):
+        self.assertEqual(self.t.name.split('i'), ['Al', 'ce'])
 
 class RedisIntTest(RedisMixin, testing.AsyncTestCase):
     def setUp(self):
