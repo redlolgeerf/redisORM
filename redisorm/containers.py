@@ -85,9 +85,8 @@ class RedisStr(Comparable, RedisContainer):
         APPEND key value Append a value to a key
         """
         self._value += increment
-        return self.db_operation(('append', increment), *args, **kwargs)
-
-    # TODO: add str methods
+        result = yield self.db_operation(('append', increment), *args, **kwargs)
+        raise gen.Return(result)
 
     def __add__(self, other):
         return self._value.__add__(other)
@@ -225,22 +224,26 @@ class RedisInt(Comparable, RedisContainer):
     @gen.coroutine
     def incr(self, *args, **kwargs):
         self._value += 1
-        return self.db_operation(('incr', ), *args, **kwargs)
+        result = yield self.db_operation(('incr', ), *args, **kwargs)
+        raise gen.Return(result)
 
     @gen.coroutine
     def incrby(self, increment, *args, **kwargs):
         self._value += increment
-        return self.db_operation(('incrby', increment), *args, **kwargs)
+        result = yield self.db_operation(('incrby', increment), *args, **kwargs)
+        raise gen.Return(result)
 
     @gen.coroutine
     def decr(self, *args, **kwargs):
         self._value -= 1
-        return self.db_operation(('decr', ), *args, **kwargs)
+        result = yield self.db_operation(('decr', ), *args, **kwargs)
+        raise gen.Return(result)
 
     @gen.coroutine
     def decrby(self, decrement, *args, **kwargs):
         self._value -= decrement
-        return self.db_operation(('decrby', decrement), *args, **kwargs)
+        result = yield self.db_operation(('decrby', decrement), *args, **kwargs)
+        raise gen.Return(result)
 
     def __abs__(self):
         return self._value.__abs__()

@@ -83,8 +83,17 @@ class RedisStrTest(RedisMixin, testing.AsyncTestCase):
         yield self.t.save()
         result = yield self.t.name.append(' Bob', conn=self.conn)
         self.assertEqual(self.t.name, 'Alice Bob')
+        self.assertEqual(result, 9)
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.name, 'Alice Bob')
+
+        pipe = self.conn.pipeline()
+        yield self.t.name.append(' Bob', pipe=pipe)
+        result = yield gen.Task(pipe.execute)
+
+        s = yield TestModel.get_by_id(_id=2)
+        self.assertEqual(s.name, 'Alice Bob Bob')
+        self.assertEqual(result, [13])
 
     def test_len(self):
         self.assertEqual(len(self.t.name), 5)
@@ -181,15 +190,17 @@ class RedisIntTest(RedisMixin, testing.AsyncTestCase):
         yield self.t.save()
         result = yield self.t.num.incr(conn=self.conn)
         self.assertEqual(self.t.num, 4)
+        self.assertEqual(result, 4)
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.num, 4)
 
         pipe = self.conn.pipeline()
         yield self.t.num.incr(pipe=pipe)
-        yield gen.Task(pipe.execute)
+        result = yield gen.Task(pipe.execute)
         s = yield TestModel.get_by_id(_id=2)
         self.assertEqual(s.num, 5)
         self.assertEqual(self.t.num, 5)
+        self.assertEqual(result, [5])
 
     @testing.gen_test
     def test_incrby(self):
@@ -198,13 +209,15 @@ class RedisIntTest(RedisMixin, testing.AsyncTestCase):
         self.assertEqual(self.t.num, 5)
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.num, 5)
+        self.assertEqual(result, 5)
 
         pipe = self.conn.pipeline()
         yield self.t.num.incrby(10, pipe=pipe)
-        yield gen.Task(pipe.execute)
+        result = yield gen.Task(pipe.execute)
         s = yield TestModel.get_by_id(_id=2)
         self.assertEqual(s.num, 15)
         self.assertEqual(self.t.num, 15)
+        self.assertEqual(result, [15])
 
     @testing.gen_test
     def test_decr(self):
@@ -213,13 +226,15 @@ class RedisIntTest(RedisMixin, testing.AsyncTestCase):
         self.assertEqual(self.t.num, 2)
         d = yield TestModel.get_by_id(_id=2)
         self.assertEqual(d.num, 2)
+        self.assertEqual(result, 2)
 
         pipe = self.conn.pipeline()
         yield self.t.num.decr(pipe=pipe)
-        yield gen.Task(pipe.execute)
+        result = yield gen.Task(pipe.execute)
         s = yield TestModel.get_by_id(_id=2)
         self.assertEqual(s.num, 1)
         self.assertEqual(self.t.num, 1)
+        self.assertEqual(result, [1])
 
     @testing.gen_test
     def test_decrby(self):
